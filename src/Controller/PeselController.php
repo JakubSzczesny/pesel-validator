@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\PeselType;
+use App\Service\PeselDecoder;
 use App\Validator\Pesel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,15 +15,28 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PeselController extends AbstractController
 {
+    public function __construct(private PeselDecoder $decoder)
+    {
+    }
+
     #[Route('/', name: 'pesel_form')]
     public function index(Request $request): Response
     {
         $form = $this->createForm(PeselType::class);
         $form->handleRequest($request);
 
+        $birthDate = null;
+        $gender = null;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $pesel = $form->get('pesel')->getData();
+            $birthDate = $this->decoder->getBirthDate($pesel);
+            $gender = $this->decoder->getGender($pesel);
+        }
+
         return $this->renderForm('pesel/index.html.twig', [
             'form' => $form,
-            'valid' => $form->isSubmitted() && $form->isValid(),
+            'birthDate' => $birthDate,
+            'gender' => $gender,
         ]);
     }
 
@@ -41,10 +55,15 @@ class PeselController extends AbstractController
             $errors[] = $violation->getMessage();
         }
 
+        if (count($errors) > 0) {
+            return $this->json(['pesel' => $pesel, 'valid' => false, 'errors' => $errors]);
+        }
+
         return $this->json([
             'pesel' => $pesel,
-            'valid' => count($errors) === 0,
-            'errors' => $errors,
+            'valid' => true,
+            'birthDate' => $this->decoder->getBirthDate($pesel)->format('Y-m-d'),
+            'gender' => $this->decoder->getGender($pesel),
         ]);
     }
 }

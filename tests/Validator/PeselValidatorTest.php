@@ -2,6 +2,7 @@
 
 namespace App\Tests\Validator;
 
+use App\Service\PeselDecoder;
 use App\Validator\Pesel;
 use App\Validator\PeselValidator;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
@@ -10,7 +11,7 @@ class PeselValidatorTest extends ConstraintValidatorTestCase
 {
     protected function createValidator(): PeselValidator
     {
-        return new PeselValidator();
+        return new PeselValidator(new PeselDecoder());
     }
 
     /**

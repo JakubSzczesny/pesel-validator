@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Service\PeselDecoder;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -10,6 +11,10 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 class PeselValidator extends ConstraintValidator
 {
     private const WEIGHTS = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+
+    public function __construct(private PeselDecoder $decoder)
+    {
+    }
 
     public function validate($value, Constraint $constraint): void
     {
@@ -31,7 +36,7 @@ class PeselValidator extends ConstraintValidator
             return;
         }
 
-        if (!$this->hasValidDate($value)) {
+        if (null === $this->decoder->getBirthDate($value)) {
             $this->context->buildViolation($constraint->dateMessage)->addViolation();
 
             return;
@@ -41,20 +46,6 @@ class PeselValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->checksumMessage)->addViolation();
         }
     }
-
-    private function hasValidDate(string $pesel): bool
-    {
-        $year = (int) substr($pesel, 0, 2);
-        $month = (int) substr($pesel, 2, 2);
-        $day = (int) substr($pesel, 4, 2);
-
-        // do miesiaca dodawane jest 20 za kazde stulecie (1800-1899 to +80)
-        $centuries = [1900, 2000, 2100, 2200, 1800];
-        $index = intdiv($month, 20);
-
-        return checkdate($month - $index * 20, $day, $centuries[$index] + $year);
-    }
-
 
     private function hasValidChecksum(string $pesel): bool
     {

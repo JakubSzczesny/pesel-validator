@@ -15,6 +15,7 @@ class PeselControllerTest extends WebTestCase
         $client->submitForm('Sprawdź', ['pesel[pesel]' => '44051401359']);
 
         $this->assertSelectorTextContains('.alert-success', 'Numer PESEL jest poprawny.');
+        $this->assertSelectorTextContains('.alert-success', '1944-05-14');
     }
 
     public function testFormWithInvalidPesel(): void
@@ -35,7 +36,8 @@ class PeselControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $response = json_decode($client->getResponse()->getContent(), true);
         $this->assertTrue($response['valid']);
-        $this->assertSame([], $response['errors']);
+        $this->assertSame('1944-05-14', $response['birthDate']);
+        $this->assertSame('mężczyzna', $response['gender']);
     }
 
     public function testApiInvalidPesel(): void

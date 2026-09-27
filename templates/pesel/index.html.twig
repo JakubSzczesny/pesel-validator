@@ -10,8 +10,12 @@
                 <button type="submit" class="btn btn-primary w-100">Sprawdź</button>
             {{ form_end(form) }}
 
-            {% if valid %}
-                <div class="alert alert-success mt-3 mb-0">Numer PESEL jest poprawny.</div>
+            {% if birthDate %}
+                <div class="alert alert-success mt-3 mb-0">
+                    <strong>Numer PESEL jest poprawny.</strong><br>
+                    Data urodzenia: {{ birthDate|date('Y-m-d') }}<br>
+                    Płeć: {{ gender }}
+                </div>
             {% endif %}
         </div>
     </div>
