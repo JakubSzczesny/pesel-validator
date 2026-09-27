@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="h4 mb-4">Walidator PESEL</h1>
+
+            {{ form_start(form) }}
+                {{ form_row(form.pesel) }}
+                <button type="submit" class="btn btn-primary w-100">Sprawdź</button>
+            {{ form_end(form) }}
+
+            {% if valid %}
+                <div class="alert alert-success mt-3 mb-0">Numer PESEL jest poprawny.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
